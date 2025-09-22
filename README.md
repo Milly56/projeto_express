@@ -1,7 +1,7 @@
 
 # Projeto Express
 
-sobre fazer um crud na api usando docker.
+sobre fazer um crud de api, fazer o login e autentificação.
 
 # tecnologias
 
@@ -10,8 +10,6 @@ Nestjs | Docker | Insomnia
 
 
 ## Instalação
-
-
 
 ```bash
   git clone 
@@ -39,5 +37,4 @@ cd projeto_express
  npm run dev
 
 ```
-
 
