@@ -12,7 +12,7 @@ Nestjs | Docker | Insomnia
 ## Instalação
 
 ```bash
-  No VScode, execute:
+  # No VScode, execute:
   git clone 
   git@github.com:Milly56/projeto_express.git
 
