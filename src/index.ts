@@ -1,12 +1,11 @@
-import express, { Request, Response } from "express";
+import "reflect-metadata"; 
+import App from "./App";
 
-const app = express();
-const port = 3000;
+const port = process.env.PORT ? Number(process.env.PORT) : 5000;
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, Express com TypeScript 🚀");
-});
+const app = new App().getApp();
 
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+  console.log(`🚀 Server running at http://localhost:${port}`);
+  console.log(`📑 Swagger disponível em http://localhost:${port}/documentation`);
 });

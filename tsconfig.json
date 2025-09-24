@@ -8,9 +8,14 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": false,
+
+    /* Tipos globais */
     "types": ["node", "express"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]
-
 }
