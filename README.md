@@ -12,6 +12,7 @@ Nestjs | Docker | Insomnia
 ## Instalação
 
 ```bash
+  No VScode, execute:
   git clone 
   git@github.com:Milly56/projeto_express.git
 
@@ -19,7 +20,7 @@ cd projeto_express
 ```
 
 ```bash
-  # instale as depências
+  # No VScode, instale as depências
 
    npm i
 ```
@@ -32,7 +33,7 @@ cd projeto_express
 ```
 
 ```bash
- # rode o projeto
+ # Dentro do VScode, rode o projeto
 
  npm run dev
 
