@@ -13,3 +13,23 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Livro {
+  livroId    Int    @id @default(autoincrement()) @map("livro_id")
+  titulo     String
+  categoria  String
+  quantidade Int    @default(0)
+}
+
+model RetiradaLivro {
+  retiradaId         Int      @id @default(autoincrement()) @map("retirada_id")
+  pessoa             String
+  livro              String   // Nome/título do livro retirado
+  quantidadeLivro    Int      // Quantidade de exemplares retirados
+  motivoRetirada     String
+  contato            String
+  dataRetirada       DateTime @default(now())
+  dataRetorno        DateTime?
+  
+  @@map("retirada_livro")
+}
