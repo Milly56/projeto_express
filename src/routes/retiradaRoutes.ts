@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { RetiradaController } from "../controllers/RetiradaController";
+import { RetiradaController } from "../controller/RetiradaController";
 
 const router = Router();
 
