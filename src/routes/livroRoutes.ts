@@ -112,4 +112,88 @@ router.post("/", LivroController.criar);
  */
 router.get("/:id", LivroController.buscarPorId);
 
+/**
+ * @openapi
+ * /api/livros/{id}:
+ *   delete:
+ *     summary: Deleta um livro pelo ID
+ *     tags: [Livros]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do livro a ser deletado
+ *     responses:
+ *       200:
+ *         description: Livro deletado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Livro deletado com sucesso
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     livroId:
+ *                       type: integer
+ *                       example: 1
+ *                     titulo:
+ *                       type: string
+ *                       example: O Hobbit
+ *                     categoria:
+ *                       type: string
+ *                       example: Fantasia
+ *                     quantidade:
+ *                       type: integer
+ *                       example: 5
+ *       400:
+ *         description: ID inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: ID deve ser um número válido
+ *       404:
+ *         description: Livro não encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Livro não encontrado
+ *       500:
+ *         description: Erro interno do servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Erro interno do servidor
+ */
+router.delete("/:id", LivroController.deletar);
 export default router;
+
