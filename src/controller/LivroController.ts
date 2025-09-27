@@ -105,4 +105,50 @@ export class LivroController {
       });
     }
   }
+ // DELETE /livros/:id - Deletar livro por ID
+  public static async deletar(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const livroId = parseInt(id);
+
+      if (isNaN(livroId)) {
+        return res.status(400).json({
+          success: false,
+          message: "ID deve ser um número válido"
+        });
+      }
+
+      // Primeiro verifica se o livro existe
+      const livroExistente = await prisma.livro.findUnique({
+        where: { livroId }
+      });
+
+      if (!livroExistente) {
+        return res.status(404).json({
+          success: false,
+          message: "Livro não encontrado"
+        });
+      }
+
+      // Deleta o livro
+      await prisma.livro.delete({
+        where: { livroId }
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Livro deletado com sucesso",
+        data: livroExistente
+      });
+
+    } catch (error) {
+      console.error('Erro ao deletar livro:', error);
+      res.status(500).json({
+        success: false,
+        message: "Erro interno do servidor",
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  }
 }
+
