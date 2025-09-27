@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PrismaClient } from "../generated/prisma";
+import { parse } from "path";
 
 const prisma = new PrismaClient();
 
@@ -105,6 +106,58 @@ export class LivroController {
       });
     }
   }
+
+  // PUT /livros/:id - Atualizar livro por ID
+  public static async atualizar(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const livroId = parseInt(id);
+
+      if(isNaN(livroId)) {
+        return res.status(400).json({
+          success: false,
+          message: "ID deve ser um número válido"
+        });
+      }
+      
+      const {titulo, categoria, quantidade } = req.body;
+
+      const livroExistente = await prisma.livro.findUnique({ where: {livroId}});
+
+      if(!livroExistente) {
+        return res.status(404).json({
+          sucess: false,
+          message: "Livro não encontrado"
+        });
+      }
+
+      const livroAtualizado = await prisma.livro.update({
+        where: { livroId },
+        data: {
+          titulo: titulo ?? livroExistente.titulo,
+          categoria: categoria ?? livroExistente.categoria,
+          quantidade: quantidade ?? livroExistente.quantidade
+        }
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Livro atualizado com sucesso",
+        data: livroAtualizado
+      });
+      
+
+    } catch (error) {
+      console.error('Erro ao atualizar livro:', error);
+
+      res.status(500).json({
+        success: false,
+        message: "Erro interno do servidor",
+        error: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
+    }
+  }
+
  // DELETE /livros/:id - Deletar livro por ID
   public static async deletar(req: Request, res: Response) {
     try {

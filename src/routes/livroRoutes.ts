@@ -195,5 +195,7 @@ router.get("/:id", LivroController.buscarPorId);
  *                   example: Erro interno do servidor
  */
 router.delete("/:id", LivroController.deletar);
-export default router;
 
+// PUT /livros/:id - Atualizar livro por ID
+router.put("/:id", LivroController.atualizar);
+export default router;
