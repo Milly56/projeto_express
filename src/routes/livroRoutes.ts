@@ -196,6 +196,38 @@ router.get("/:id", LivroController.buscarPorId);
  */
 router.delete("/:id", LivroController.deletar);
 
-// PUT /livros/:id - Atualizar livro por ID
+/**
+ * @openapi
+ * /api/livros/{id}:
+ *   put:
+ *     summary: Atualiza um livro pelo ID
+ *     tags: [Livros]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do livro a ser atualizado
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               titulo:
+ *                 type: string
+ *                 example: O Silmarillion
+ *               autor:
+ *                 type: string
+ *                 example: J. R. R. Tolkien
+ *     responses:
+ *       200:
+ *         description: Livro atualizado com sucesso
+ *       400:
+ *         description: ID inválido ou dados incorretos
+ *       404:
+ *         description: Livro não encontrado
+ */
 router.put("/:id", LivroController.atualizar);
-export default router;
