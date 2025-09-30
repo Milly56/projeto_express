@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { RetiradaController } from "../controller/RetiradaController";
+import { autenticarJWT } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -16,6 +17,8 @@ const router = Router();
  *   get:
  *     summary: Lista todas as retiradas
  *     tags: [Retiradas]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de retiradas retornada com sucesso
@@ -45,7 +48,7 @@ const router = Router();
  *                     nullable: true
  *                     example: null
  */
-router.get("/", RetiradaController.listarTodas);
+router.get("/",autenticarJWT, RetiradaController.listarTodas);
 
 /**
  * @openapi
@@ -53,6 +56,8 @@ router.get("/", RetiradaController.listarTodas);
  *   post:
  *     summary: Registra uma nova retirada
  *     tags: [Retiradas]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -91,7 +96,7 @@ router.get("/", RetiradaController.listarTodas);
  *                   format: date-time
  *                   example: 2025-09-26T15:00:00Z
  */
-router.post("/", RetiradaController.criar);
+router.post("/",autenticarJWT, RetiradaController.criar);
 
 /**
  * @openapi
@@ -99,6 +104,8 @@ router.post("/", RetiradaController.criar);
  *   put:
  *     summary: Registra a devolução de uma retirada
  *     tags: [Retiradas]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -134,6 +141,6 @@ router.post("/", RetiradaController.criar);
  *       404:
  *         description: Retirada não encontrada
  */
-router.put("/:id/devolver", RetiradaController.registrarDevolucao);
+router.put("/:id/devolver",autenticarJWT, RetiradaController.registrarDevolucao);
 
 export default router;

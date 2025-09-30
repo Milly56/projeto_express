@@ -33,3 +33,22 @@ model RetiradaLivro {
   
   @@map("retirada_livro")
 }
+<<<<<<< Updated upstream
+=======
+
+model Usuario {
+  id              Int              @id @default(autoincrement())
+  nome            String
+  data_nascimento DateTime        @db.Date
+  email           String @unique @db.VarChar(100)
+  senha_hash      String
+  
+  retiradas RetiradaLivro[]
+}
+
+model login {
+  id         Int    @id @default(autoincrement())
+  email      String @unique @db.VarChar(100)
+  senha_hash String
+}
+>>>>>>> Stashed changes

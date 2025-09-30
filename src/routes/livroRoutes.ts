@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { LivroController } from "../controller/LivroController";
+import { autenticarJWT } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -16,6 +17,8 @@ const router = Router();
  *   get:
  *     summary: Lista todos os livros
  *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de livros retornada com sucesso
@@ -33,7 +36,7 @@ const router = Router();
  *                     type: string
  *                     example: O Senhor dos Anéis
  */
-router.get("/", LivroController.listarTodos);
+router.get("/",autenticarJWT,LivroController.listarTodos);
 
 /**
  * @openapi
@@ -41,6 +44,8 @@ router.get("/", LivroController.listarTodos);
  *   post:
  *     summary: Cria um novo livro
  *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -75,7 +80,7 @@ router.get("/", LivroController.listarTodos);
  *                   type: string
  *                   example: J. R. R. Tolkien
  */
-router.post("/", LivroController.criar);
+router.post("/",autenticarJWT,LivroController.criar);
 
 /**
  * @openapi
@@ -83,6 +88,8 @@ router.post("/", LivroController.criar);
  *   get:
  *     summary: Busca um livro pelo ID
  *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -110,7 +117,7 @@ router.post("/", LivroController.criar);
  *       404:
  *         description: Livro não encontrado
  */
-router.get("/:id", LivroController.buscarPorId);
+router.get("/:id",autenticarJWT,LivroController.buscarPorId);
 
 /**
  * @openapi
@@ -118,6 +125,8 @@ router.get("/:id", LivroController.buscarPorId);
  *   delete:
  *     summary: Deleta um livro pelo ID
  *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -194,7 +203,7 @@ router.get("/:id", LivroController.buscarPorId);
  *                   type: string
  *                   example: Erro interno do servidor
  */
-router.delete("/:id", LivroController.deletar);
+router.delete("/:id",autenticarJWT,LivroController.deletar);
 
 /**
  * @openapi
@@ -202,6 +211,8 @@ router.delete("/:id", LivroController.deletar);
  *   put:
  *     summary: Atualiza um livro pelo ID
  *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -230,4 +241,10 @@ router.delete("/:id", LivroController.deletar);
  *       404:
  *         description: Livro não encontrado
  */
+<<<<<<< Updated upstream
 router.put("/:id", LivroController.atualizar);
+=======
+router.put("/:id",autenticarJWT,LivroController.atualizar);
+
+export default router;
+>>>>>>> Stashed changes
