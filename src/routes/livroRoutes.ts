@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { LivroController } from "../controller/LivroController";
-import { autenticarJWT } from "../middleware/authMiddleware";
+import { autenticarJWT} from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -8,7 +8,17 @@ const router = Router();
  * @openapi
  * tags:
  *   name: Livros
- *   description: Endpoints para gerenciar livros
+ *   description: Operações relacionadas aos livros (necessário Bearer Token)
+ */
+
+/**
+ * @openapi
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 
 /**
@@ -21,22 +31,9 @@ const router = Router();
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Lista de livros retornada com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                     example: 1
- *                   titulo:
- *                     type: string
- *                     example: O Senhor dos Anéis
+ *         description: Lista de livros
  */
-router.get("/",autenticarJWT,LivroController.listarTodos);
+router.get("/", autenticarJWT, LivroController.listarTodos);
 
 /**
  * @openapi
@@ -54,33 +51,22 @@ router.get("/",autenticarJWT,LivroController.listarTodos);
  *             type: object
  *             required:
  *               - titulo
- *               - autor
+ *               - categoria
  *             properties:
  *               titulo:
  *                 type: string
- *                 example: O Hobbit
- *               autor:
+ *                 example: "O Senhor dos Anéis"
+ *               categoria:
  *                 type: string
- *                 example: J. R. R. Tolkien
+ *                 example: "Fantasia"
+ *               quantidade:
+ *                 type: integer
+ *                 example: 10
  *     responses:
  *       201:
  *         description: Livro criado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 1
- *                 titulo:
- *                   type: string
- *                   example: O Hobbit
- *                 autor:
- *                   type: string
- *                   example: J. R. R. Tolkien
  */
-router.post("/",autenticarJWT,LivroController.criar);
+router.post("/", autenticarJWT, LivroController.criar);
 
 /**
  * @openapi
@@ -100,116 +86,16 @@ router.post("/",autenticarJWT,LivroController.criar);
  *     responses:
  *       200:
  *         description: Livro encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: integer
- *                   example: 1
- *                 titulo:
- *                   type: string
- *                   example: O Hobbit
- *                 autor:
- *                   type: string
- *                   example: J. R. R. Tolkien
  *       404:
  *         description: Livro não encontrado
  */
-router.get("/:id",autenticarJWT,LivroController.buscarPorId);
-
-/**
- * @openapi
- * /api/livros/{id}:
- *   delete:
- *     summary: Deleta um livro pelo ID
- *     tags: [Livros]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID do livro a ser deletado
- *     responses:
- *       200:
- *         description: Livro deletado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Livro deletado com sucesso
- *                 data:
- *                   type: object
- *                   properties:
- *                     livroId:
- *                       type: integer
- *                       example: 1
- *                     titulo:
- *                       type: string
- *                       example: O Hobbit
- *                     categoria:
- *                       type: string
- *                       example: Fantasia
- *                     quantidade:
- *                       type: integer
- *                       example: 5
- *       400:
- *         description: ID inválido
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: ID deve ser um número válido
- *       404:
- *         description: Livro não encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Livro não encontrado
- *       500:
- *         description: Erro interno do servidor
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Erro interno do servidor
- */
-router.delete("/:id",autenticarJWT,LivroController.deletar);
+router.get("/:id", autenticarJWT, LivroController.buscarPorId);
 
 /**
  * @openapi
  * /api/livros/{id}:
  *   put:
- *     summary: Atualiza um livro pelo ID
+ *     summary: Atualiza um livro existente
  *     tags: [Livros]
  *     security:
  *       - bearerAuth: []
@@ -219,7 +105,6 @@ router.delete("/:id",autenticarJWT,LivroController.deletar);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID do livro a ser atualizado
  *     requestBody:
  *       required: true
  *       content:
@@ -229,22 +114,38 @@ router.delete("/:id",autenticarJWT,LivroController.deletar);
  *             properties:
  *               titulo:
  *                 type: string
- *                 example: O Silmarillion
- *               autor:
+ *               categoria:
  *                 type: string
- *                 example: J. R. R. Tolkien
+ *               quantidade:
+ *                 type: integer
  *     responses:
  *       200:
- *         description: Livro atualizado com sucesso
- *       400:
- *         description: ID inválido ou dados incorretos
+ *         description: Livro atualizado
  *       404:
  *         description: Livro não encontrado
  */
-<<<<<<< Updated upstream
-router.put("/:id", LivroController.atualizar);
-=======
-router.put("/:id",autenticarJWT,LivroController.atualizar);
+router.put("/:id", autenticarJWT, LivroController.atualizar);
+
+/**
+ * @openapi
+ * /api/livros/{id}:
+ *   delete:
+ *     summary: Remove um livro
+ *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Livro removido com sucesso
+ *       404:
+ *         description: Livro não encontrado
+ */
+router.delete("/:id", autenticarJWT, LivroController.deletar);
 
 export default router;
->>>>>>> Stashed changes

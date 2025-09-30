@@ -1,56 +1,37 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "../generated/prisma";
+import { RetiradaService } from "../service/RetiradaService";
 
-const prisma = new PrismaClient();
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
 
 export class RetiradaController {
-
-  // GET /retiradas - Listar todas as retiradas
-  public static async listarTodas(req: Request, res: Response) {
+  static async listarTodas(req: Request, res: Response) {
     try {
-      const retiradas = await prisma.retiradaLivro.findMany({
-        orderBy: { dataRetirada: 'desc' }
-      });
-
+      const retiradas = await RetiradaService.listarTodas();
       res.status(200).json({
         success: true,
         message: "Retiradas listadas com sucesso",
         data: retiradas,
         total: retiradas.length
       });
-
     } catch (error) {
-      console.error('Erro ao listar retiradas:', error);
       res.status(500).json({
         success: false,
-        message: "Erro interno do servidor",
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: getErrorMessage(error)
       });
     }
   }
 
-  // POST /retiradas - Criar nova retirada
-  public static async criar(req: Request, res: Response) {
+  static async criar(req: Request, res: Response) {
     try {
-      const { pessoa, livro, quantidadeLivro, motivoRetirada, contato } = req.body;
-
-      // Validação simples
-      if (!pessoa || !livro || !quantidadeLivro || !motivoRetirada || !contato) {
-        return res.status(400).json({
-          success: false,
-          message: "Todos os campos são obrigatórios: pessoa, livro, quantidadeLivro, motivoRetirada, contato"
-        });
-      }
-
-      const novaRetirada = await prisma.retiradaLivro.create({
-        data: {
-          pessoa,
-          livro,
-          quantidadeLivro: parseInt(quantidadeLivro),
-          motivoRetirada,
-          contato
-          // dataRetirada será preenchida automaticamente
-        }
+      const novaRetirada = await RetiradaService.criar({
+        usuarioId: parseInt(req.body.usuarioId),
+        livroId: parseInt(req.body.livroId),
+        quantidadeLivro: parseInt(req.body.quantidadeLivro),
+        motivoRetirada: req.body.motivoRetirada,
+        contato: req.body.contato
       });
 
       res.status(201).json({
@@ -58,49 +39,29 @@ export class RetiradaController {
         message: "Retirada registrada com sucesso",
         data: novaRetirada
       });
-
     } catch (error) {
-      console.error('Erro ao criar retirada:', error);
-      res.status(500).json({
+      res.status(400).json({
         success: false,
-        message: "Erro interno do servidor",
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: getErrorMessage(error)
       });
     }
   }
 
-  // PUT /retiradas/:id/devolver - Registrar devolução
-  public static async registrarDevolucao(req: Request, res: Response) {
+  static async registrarDevolucao(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const retiradaId = parseInt(id);
+      const retiradaId = parseInt(req.params.id);
 
-      if (isNaN(retiradaId)) {
-        return res.status(400).json({
-          success: false,
-          message: "ID deve ser um número válido"
-        });
-      }
-
-      const retiradaAtualizada = await prisma.retiradaLivro.update({
-        where: { retiradaId },
-        data: {
-          dataRetorno: new Date()
-        }
-      });
+      const retiradaAtualizada = await RetiradaService.registrarDevolucao(retiradaId);
 
       res.status(200).json({
         success: true,
         message: "Devolução registrada com sucesso",
         data: retiradaAtualizada
       });
-
     } catch (error) {
-      console.error('Erro ao registrar devolução:', error);
-      res.status(500).json({
+      res.status(400).json({
         success: false,
-        message: "Erro interno do servidor",
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: getErrorMessage(error)
       });
     }
   }

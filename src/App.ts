@@ -1,20 +1,14 @@
-<<<<<<< Updated upstream
+
 import express, { Application } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 
 import livroRoutes from './routes/livroRoutes';       
 import retiradaRoutes from './routes/retiradaRoutes'; 
-=======
-import express, { Application } from "express";
-import swaggerUi from "swagger-ui-express";
-import swaggerJSDoc from "swagger-jsdoc";
 
-import livroRoutes from "./routes/livroRoutes";
-import retiradaRoutes from "./routes/retiradaRoutes";
 import usuariosRoutes from "./routes/usuarioRoutes";
 import loginRoutes from "./routes/LoginRoutes";
->>>>>>> Stashed changes
+
 
 export default class App {
   private app: Application;
@@ -66,16 +60,10 @@ export default class App {
     this.app.use("/api/usuarios", usuariosRoutes);
     this.app.use("/api/login", loginRoutes);
 
-<<<<<<< Updated upstream
-    this.app.use('/api/livros', livroRoutes);
-    this.app.use('/api/retiradas', retiradaRoutes);
 
-    this.app.get('/', (req, res) => {
-      res.send('API funcionando! 🚀');
-=======
     this.app.get("/", (req, res) => {
       res.send("API funcionando! 🚀");
->>>>>>> Stashed changes
+
     });
   }
 
