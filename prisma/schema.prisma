@@ -19,17 +19,37 @@ model Livro {
   titulo     String
   categoria  String
   quantidade Int    @default(0)
+
+  retiradas RetiradaLivro[]
 }
 
 model RetiradaLivro {
   retiradaId         Int      @id @default(autoincrement()) @map("retirada_id")
-  pessoa             String
-  livro              String   // Nome/título do livro retirado
-  quantidadeLivro    Int      // Quantidade de exemplares retirados
+  quantidadeLivro    Int
   motivoRetirada     String
   contato            String
   dataRetirada       DateTime @default(now())
   dataRetorno        DateTime?
-  
+
+  usuarioId Int
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+  livroId Int
+  livro   Livro @relation(fields: [livroId], references: [livroId])
+
   @@map("retirada_livro")
+}
+
+model Usuario {
+  id              Int              @id @default(autoincrement())
+  nome            String
+  data_nascimento DateTime        @db.Date
+
+  retiradas RetiradaLivro[]
+}
+
+model Login {
+  id         Int    @id @default(autoincrement())
+  email      String @unique @db.VarChar(100)
+  senha_hash String
 }

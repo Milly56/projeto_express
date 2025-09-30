@@ -26,12 +26,18 @@ const router = Router();
  *               items:
  *                 type: object
  *                 properties:
- *                   id:
+ *                   livroId:
  *                     type: integer
  *                     example: 1
  *                   titulo:
  *                     type: string
  *                     example: O Senhor dos Anéis
+ *                   categoria:
+ *                     type: string
+ *                     example: Fantasia
+ *                   quantidade:
+ *                     type: integer
+ *                     example: 5
  */
 router.get("/", LivroController.listarTodos);
 
@@ -49,14 +55,18 @@ router.get("/", LivroController.listarTodos);
  *             type: object
  *             required:
  *               - titulo
- *               - autor
+ *               - categoria
+ *               - quantidade
  *             properties:
  *               titulo:
  *                 type: string
  *                 example: O Hobbit
- *               autor:
+ *               categoria:
  *                 type: string
- *                 example: J. R. R. Tolkien
+ *                 example: Fantasia
+ *               quantidade:
+ *                 type: integer
+ *                 example: 10
  *     responses:
  *       201:
  *         description: Livro criado com sucesso
@@ -65,15 +75,18 @@ router.get("/", LivroController.listarTodos);
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 livroId:
  *                   type: integer
  *                   example: 1
  *                 titulo:
  *                   type: string
  *                   example: O Hobbit
- *                 autor:
+ *                 categoria:
  *                   type: string
- *                   example: J. R. R. Tolkien
+ *                   example: Fantasia
+ *                 quantidade:
+ *                   type: integer
+ *                   example: 10
  */
 router.post("/", LivroController.criar);
 
@@ -98,15 +111,18 @@ router.post("/", LivroController.criar);
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 livroId:
  *                   type: integer
  *                   example: 1
  *                 titulo:
  *                   type: string
  *                   example: O Hobbit
- *                 autor:
+ *                 categoria:
  *                   type: string
- *                   example: J. R. R. Tolkien
+ *                   example: Fantasia
+ *                 quantidade:
+ *                   type: integer
+ *                   example: 10
  *       404:
  *         description: Livro não encontrado
  */
@@ -156,43 +172,10 @@ router.get("/:id", LivroController.buscarPorId);
  *                       example: 5
  *       400:
  *         description: ID inválido
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: ID deve ser um número válido
  *       404:
  *         description: Livro não encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Livro não encontrado
  *       500:
  *         description: Erro interno do servidor
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Erro interno do servidor
  */
 router.delete("/:id", LivroController.deletar);
 
@@ -219,9 +202,12 @@ router.delete("/:id", LivroController.deletar);
  *               titulo:
  *                 type: string
  *                 example: O Silmarillion
- *               autor:
+ *               categoria:
  *                 type: string
- *                 example: J. R. R. Tolkien
+ *                 example: Fantasia
+ *               quantidade:
+ *                 type: integer
+ *                 example: 8
  *     responses:
  *       200:
  *         description: Livro atualizado com sucesso
@@ -231,3 +217,5 @@ router.delete("/:id", LivroController.deletar);
  *         description: Livro não encontrado
  */
 router.put("/:id", LivroController.atualizar);
+
+export default router;

@@ -4,6 +4,9 @@ import swaggerJSDoc from 'swagger-jsdoc';
 
 import livroRoutes from './routes/livroRoutes';       
 import retiradaRoutes from './routes/retiradaRoutes'; 
+import usuariosRoutes from './routes/usuarioRoutes'
+import  loginRoutes  from './routes/LoginRoutes'
+
 
 export default class App {
   private app: Application;
@@ -44,6 +47,8 @@ export default class App {
 
     this.app.use('/api/livros', livroRoutes);
     this.app.use('/api/retiradas', retiradaRoutes);
+    this.app.use('/api/usuarios',usuariosRoutes);
+    this.app.use('/api/login',loginRoutes);
 
     this.app.get('/', (req, res) => {
       res.send('API funcionando! 🚀');

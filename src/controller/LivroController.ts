@@ -1,207 +1,57 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "../generated/prisma";
-import { parse } from "path";
+import { LivroService } from "../service/LivroService";
 
-const prisma = new PrismaClient();
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
 
 export class LivroController {
-
-  // GET /livros - Listar todos os livros
-  public static async listarTodos(req: Request, res: Response) {
+  static async listarTodos(req: Request, res: Response) {
     try {
-      const livros = await prisma.livro.findMany({
-        orderBy: { livroId: 'asc' }
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Livros listados com sucesso",
-        data: livros,
-        total: livros.length
-      });
-
+      const livros = await LivroService.listarTodos();
+      res.status(200).json({ success: true, data: livros, total: livros.length });
     } catch (error) {
-      console.error('Erro ao listar livros:', error);
-      res.status(500).json({
-        success: false,
-        message: "Erro interno do servidor",
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
-      });
+      res.status(500).json({ success: false, message: getErrorMessage(error) });
     }
   }
 
-  // POST /livros - Criar um novo livro
-  public static async criar(req: Request, res: Response) {
+  static async criar(req: Request, res: Response) {
     try {
-      const { titulo, categoria, quantidade } = req.body;
-
-      // Validação simples
-      if (!titulo || !categoria) {
-        return res.status(400).json({
-          success: false,
-          message: "Título e categoria são obrigatórios"
-        });
-      }
-
-      const novoLivro = await prisma.livro.create({
-        data: {
-          titulo,
-          categoria,
-          quantidade: quantidade || 0
-        }
-      });
-
-      res.status(201).json({
-        success: true,
-        message: "Livro criado com sucesso",
-        data: novoLivro
-      });
-
+      const novoLivro = await LivroService.criar(req.body);
+      res.status(201).json({ success: true, data: novoLivro });
     } catch (error) {
-      console.error('Erro ao criar livro:', error);
-      res.status(500).json({
-        success: false,
-        message: "Erro interno do servidor",
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
-      });
+      res.status(400).json({ success: false, message: getErrorMessage(error) });
     }
   }
 
-  // GET /livros/:id - Buscar livro por ID
-  public static async buscarPorId(req: Request, res: Response) {
+  static async buscarPorId(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const livroId = parseInt(id);
-
-      if (isNaN(livroId)) {
-        return res.status(400).json({
-          success: false,
-          message: "ID deve ser um número válido"
-        });
-      }
-
-      const livro = await prisma.livro.findUnique({
-        where: { livroId }
-      });
-
+      const livro = await LivroService.buscarPorId(parseInt(req.params.id));
       if (!livro) {
-        return res.status(404).json({
-          success: false,
-          message: "Livro não encontrado"
-        });
+        return res.status(404).json({ success: false, message: "Livro não encontrado" });
       }
-
-      res.status(200).json({
-        success: true,
-        message: "Livro encontrado",
-        data: livro
-      });
-
+      res.status(200).json({ success: true, data: livro });
     } catch (error) {
-      console.error('Erro ao buscar livro:', error);
-      res.status(500).json({
-        success: false,
-        message: "Erro interno do servidor",
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
-      });
+      res.status(400).json({ success: false, message: getErrorMessage(error) });
     }
   }
 
-  // PUT /livros/:id - Atualizar livro por ID
-  public static async atualizar(req: Request, res: Response) {
+  static async atualizar(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const livroId = parseInt(id);
-
-      if(isNaN(livroId)) {
-        return res.status(400).json({
-          success: false,
-          message: "ID deve ser um número válido"
-        });
-      }
-      
-      const {titulo, categoria, quantidade } = req.body;
-
-      const livroExistente = await prisma.livro.findUnique({ where: {livroId}});
-
-      if(!livroExistente) {
-        return res.status(404).json({
-          sucess: false,
-          message: "Livro não encontrado"
-        });
-      }
-
-      const livroAtualizado = await prisma.livro.update({
-        where: { livroId },
-        data: {
-          titulo: titulo ?? livroExistente.titulo,
-          categoria: categoria ?? livroExistente.categoria,
-          quantidade: quantidade ?? livroExistente.quantidade
-        }
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Livro atualizado com sucesso",
-        data: livroAtualizado
-      });
-      
-
+      const livroAtualizado = await LivroService.atualizar(parseInt(req.params.id), req.body);
+      res.status(200).json({ success: true, data: livroAtualizado });
     } catch (error) {
-      console.error('Erro ao atualizar livro:', error);
-
-      res.status(500).json({
-        success: false,
-        message: "Erro interno do servidor",
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
-      });
+      res.status(400).json({ success: false, message: getErrorMessage(error) });
     }
   }
 
- // DELETE /livros/:id - Deletar livro por ID
-  public static async deletar(req: Request, res: Response) {
+  static async deletar(req: Request, res: Response) {
     try {
-      const { id } = req.params;
-      const livroId = parseInt(id);
-
-      if (isNaN(livroId)) {
-        return res.status(400).json({
-          success: false,
-          message: "ID deve ser um número válido"
-        });
-      }
-
-      // Primeiro verifica se o livro existe
-      const livroExistente = await prisma.livro.findUnique({
-        where: { livroId }
-      });
-
-      if (!livroExistente) {
-        return res.status(404).json({
-          success: false,
-          message: "Livro não encontrado"
-        });
-      }
-
-      // Deleta o livro
-      await prisma.livro.delete({
-        where: { livroId }
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "Livro deletado com sucesso",
-        data: livroExistente
-      });
-
+      const livroDeletado = await LivroService.deletar(parseInt(req.params.id));
+      res.status(200).json({ success: true, data: livroDeletado });
     } catch (error) {
-      console.error('Erro ao deletar livro:', error);
-      res.status(500).json({
-        success: false,
-        message: "Erro interno do servidor",
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
-      });
+      res.status(400).json({ success: false, message: getErrorMessage(error) });
     }
   }
 }
-

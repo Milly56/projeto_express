@@ -26,20 +26,29 @@ const router = Router();
  *               items:
  *                 type: object
  *                 properties:
- *                   id:
+ *                   retiradaId:
  *                     type: integer
  *                     example: 1
- *                   livroId:
- *                     type: integer
- *                     example: 10
  *                   usuarioId:
  *                     type: integer
  *                     example: 5
+ *                   livroId:
+ *                     type: integer
+ *                     example: 3
+ *                   quantidadeLivro:
+ *                     type: integer
+ *                     example: 2
+ *                   motivoRetirada:
+ *                     type: string
+ *                     example: Pesquisa escolar
+ *                   contato:
+ *                     type: string
+ *                     example: joao@email.com
  *                   dataRetirada:
  *                     type: string
  *                     format: date-time
  *                     example: 2025-09-26T15:00:00Z
- *                   dataDevolucao:
+ *                   dataRetorno:
  *                     type: string
  *                     format: date-time
  *                     nullable: true
@@ -60,15 +69,25 @@ router.get("/", RetiradaController.listarTodas);
  *           schema:
  *             type: object
  *             required:
- *               - livroId
  *               - usuarioId
+ *               - livroId
+ *               - quantidadeLivro
  *             properties:
- *               livroId:
- *                 type: integer
- *                 example: 10
  *               usuarioId:
  *                 type: integer
  *                 example: 5
+ *               livroId:
+ *                 type: integer
+ *                 example: 3
+ *               quantidadeLivro:
+ *                 type: integer
+ *                 example: 1
+ *               motivoRetirada:
+ *                 type: string
+ *                 example: Leitura recreativa
+ *               contato:
+ *                 type: string
+ *                 example: joao@email.com
  *     responses:
  *       201:
  *         description: Retirada registrada com sucesso
@@ -77,15 +96,24 @@ router.get("/", RetiradaController.listarTodas);
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 retiradaId:
  *                   type: integer
  *                   example: 1
- *                 livroId:
- *                   type: integer
- *                   example: 10
  *                 usuarioId:
  *                   type: integer
  *                   example: 5
+ *                 livroId:
+ *                   type: integer
+ *                   example: 3
+ *                 quantidadeLivro:
+ *                   type: integer
+ *                   example: 1
+ *                 motivoRetirada:
+ *                   type: string
+ *                   example: Leitura recreativa
+ *                 contato:
+ *                   type: string
+ *                   example: joao@email.com
  *                 dataRetirada:
  *                   type: string
  *                   format: date-time
@@ -114,20 +142,29 @@ router.post("/", RetiradaController.criar);
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 retiradaId:
  *                   type: integer
  *                   example: 1
- *                 livroId:
- *                   type: integer
- *                   example: 10
  *                 usuarioId:
  *                   type: integer
  *                   example: 5
+ *                 livroId:
+ *                   type: integer
+ *                   example: 3
+ *                 quantidadeLivro:
+ *                   type: integer
+ *                   example: 2
+ *                 motivoRetirada:
+ *                   type: string
+ *                   example: Pesquisa escolar
+ *                 contato:
+ *                   type: string
+ *                   example: joao@email.com
  *                 dataRetirada:
  *                   type: string
  *                   format: date-time
  *                   example: 2025-09-20T15:00:00Z
- *                 dataDevolucao:
+ *                 dataRetorno:
  *                   type: string
  *                   format: date-time
  *                   example: 2025-09-26T15:00:00Z
