@@ -1,7 +1,18 @@
 import { PrismaClient } from "../generated/prisma";
 import bcrypt from "bcrypt";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
+
+const criarUsuarioSchema = z.object({
+  nome: z.string().min(1, "Nome é obrigatório"),
+  data_nascimento: z.string().refine(
+    (val) => !isNaN(new Date(val).getTime()),
+    { message: "Data de nascimento inválida" }
+  ),
+  email: z.string().email("Email inválido"),
+  senha: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+});
 
 export class UsuarioService {
   static async listarTodos() {
@@ -12,23 +23,16 @@ export class UsuarioService {
   }
 
   static async criar(data: { nome: string; data_nascimento: string; email: string; senha: string }) {
-    if (!data.nome || !data.data_nascimento || !data.email || !data.senha) {
-      throw new Error("Nome, data de nascimento, email e senha são obrigatórios");
-    }
+    const validData = criarUsuarioSchema.parse(data);
 
-    const nascimento = new Date(data.data_nascimento);
-    if (isNaN(nascimento.getTime())) {
-      throw new Error("Data de nascimento inválida");
-    }
-
-  
-    const senhaHash = await bcrypt.hash(data.senha, 10);
+    const nascimento = new Date(validData.data_nascimento);
+    const senhaHash = await bcrypt.hash(validData.senha, 10);
 
     return prisma.usuario.create({
       data: {
-        nome: data.nome,
+        nome: validData.nome,
         data_nascimento: nascimento,
-        email: data.email,
+        email: validData.email,
         senha_hash: senhaHash,
       },
     });
@@ -60,7 +64,14 @@ export class UsuarioService {
 
     let senhaHash: string | undefined;
     if (data.senha) {
+      if (data.senha.length < 6) {
+        throw new Error("A senha deve ter no mínimo 6 caracteres");
+      }
       senhaHash = await bcrypt.hash(data.senha, 10);
+    }
+
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      throw new Error("Email inválido");
     }
 
     return prisma.usuario.update({
