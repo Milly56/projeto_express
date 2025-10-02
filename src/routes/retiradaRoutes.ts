@@ -19,6 +19,37 @@ const router = Router();
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
+ *   schemas:
+ *     RetiradaLivro:
+ *       type: object
+ *       properties:
+ *         retiradaId:
+ *           type: integer
+ *           example: 1
+ *         quantidadeLivro:
+ *           type: integer
+ *           example: 2
+ *         motivoRetirada:
+ *           type: string
+ *           example: "Estudo para prova"
+ *         contato:
+ *           type: string
+ *           example: "(81) 99999-0000"
+ *         dataRetirada:
+ *           type: string
+ *           format: date-time
+ *           example: 2025-09-26T15:00:00Z
+ *         dataRetorno:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: null
+ *         usuarioId:
+ *           type: integer
+ *           example: 5
+ *         livroId:
+ *           type: integer
+ *           example: 10
  */
 
 /**
@@ -37,37 +68,35 @@ const router = Router();
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   retiradaId:
- *                     type: integer
- *                     example: 1
- *                   livroId:
- *                     type: integer
- *                     example: 10
- *                   usuarioId:
- *                     type: integer
- *                     example: 5
- *                   quantidadeLivro:
- *                     type: integer
- *                     example: 2
- *                   motivoRetirada:
- *                     type: string
- *                     example: "Estudo para prova"
- *                   contato:
- *                     type: string
- *                     example: "(81) 99999-0000"
- *                   dataRetirada:
- *                     type: string
- *                     format: date-time
- *                     example: 2025-09-26T15:00:00Z
- *                   dataRetorno:
- *                     type: string
- *                     format: date-time
- *                     nullable: true
- *                     example: null
+ *                 $ref: '#/components/schemas/RetiradaLivro'
  */
 router.get("/", autenticarJWT, RetiradaController.listarTodas);
+
+/**
+ * @openapi
+ * /api/retiradas/{id}:
+ *   get:
+ *     summary: Obtém uma retirada específica por ID
+ *     tags: [Retiradas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Retirada encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RetiradaLivro'
+ *       404:
+ *         description: Retirada não encontrada
+ */
+router.get("/:id", autenticarJWT, RetiradaController.listarPorId);
 
 /**
  * @openapi
@@ -84,18 +113,18 @@ router.get("/", autenticarJWT, RetiradaController.listarTodas);
  *           schema:
  *             type: object
  *             required:
- *               - livroId
  *               - usuarioId
+ *               - livroId
  *               - quantidadeLivro
  *               - motivoRetirada
  *               - contato
  *             properties:
- *               livroId:
- *                 type: integer
- *                 example: 10
  *               usuarioId:
  *                 type: integer
  *                 example: 5
+ *               livroId:
+ *                 type: integer
+ *                 example: 10
  *               quantidadeLivro:
  *                 type: integer
  *                 example: 1
@@ -111,30 +140,7 @@ router.get("/", autenticarJWT, RetiradaController.listarTodas);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 retiradaId:
- *                   type: integer
- *                   example: 1
- *                 livroId:
- *                   type: integer
- *                   example: 10
- *                 usuarioId:
- *                   type: integer
- *                   example: 5
- *                 quantidadeLivro:
- *                   type: integer
- *                   example: 1
- *                 motivoRetirada:
- *                   type: string
- *                   example: "Leitura para pesquisa"
- *                 contato:
- *                   type: string
- *                   example: "(81) 91234-5678"
- *                 dataRetirada:
- *                   type: string
- *                   format: date-time
- *                   example: 2025-09-26T15:00:00Z
+ *               $ref: '#/components/schemas/RetiradaLivro'
  */
 router.post("/", autenticarJWT, RetiradaController.criar);
 
@@ -152,35 +158,42 @@ router.post("/", autenticarJWT, RetiradaController.criar);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID da retirada
  *     responses:
  *       200:
  *         description: Devolução registrada com sucesso
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 retiradaId:
- *                   type: integer
- *                   example: 1
- *                 livroId:
- *                   type: integer
- *                   example: 10
- *                 usuarioId:
- *                   type: integer
- *                   example: 5
- *                 dataRetirada:
- *                   type: string
- *                   format: date-time
- *                   example: 2025-09-20T15:00:00Z
- *                 dataRetorno:
- *                   type: string
- *                   format: date-time
- *                   example: 2025-09-26T15:00:00Z
+ *               $ref: '#/components/schemas/RetiradaLivro'
  *       404:
  *         description: Retirada não encontrada
  */
 router.put("/:id/devolver", autenticarJWT, RetiradaController.registrarDevolucao);
+
+/**
+ * @openapi
+ * /api/retiradas/{id}:
+ *   delete:
+ *     summary: Remove uma retirada por ID
+ *     tags: [Retiradas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Retirada removida com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RetiradaLivro'
+ *       404:
+ *         description: Retirada não encontrada
+ */
+router.delete("/:id", autenticarJWT, RetiradaController.deletarPorId);
 
 export default router;
