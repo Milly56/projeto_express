@@ -7,5 +7,4 @@ const app = new App().getApp();
 
 app.listen(port, () => {
   console.log(`🚀 Server running at http://localhost:${port}`);
-  console.log(`📑 Swagger disponível em http://localhost:${port}/api-docs`);
 });
