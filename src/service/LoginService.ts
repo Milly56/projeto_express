@@ -1,9 +1,7 @@
-import { PrismaClient } from "../generated/prisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-
-const prisma = new PrismaClient();
+import { prisma } from "../database/prisma/prisma";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Formato de e-mail inválido" }),
@@ -20,14 +18,17 @@ export class LoginService {
       }));
       throw new Error(`Erro de validação: ${JSON.stringify(erros)}`);
     }
+
     const user = await prisma.usuario.findUnique({ where: { email } });
     if (!user) {
       throw new Error("Usuário não encontrado");
     }
+
     const senhaValida = await bcrypt.compare(senha, user.senha_hash);
     if (!senhaValida) {
       throw new Error("Senha inválida");
     }
+
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET || "secret",

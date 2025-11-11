@@ -1,15 +1,14 @@
-import { PrismaClient } from "../generated/prisma";
 import bcrypt from "bcrypt";
 import { z } from "zod";
-
-const prisma = new PrismaClient();
+import { prisma } from "../database/prisma/prisma";
 
 const criarUsuarioSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),
-  data_nascimento: z.string().refine(
-    (val) => !isNaN(new Date(val).getTime()),
-    { message: "Data de nascimento inválida" }
-  ),
+  data_nascimento: z
+    .string()
+    .refine((val) => !isNaN(new Date(val).getTime()), {
+      message: "Data de nascimento inválida",
+    }),
   email: z.string().email("Email inválido"),
   senha: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
 });
@@ -22,7 +21,12 @@ export class UsuarioService {
     });
   }
 
-  static async criar(data: { nome: string; data_nascimento: string; email: string; senha: string }) {
+  static async criar(data: {
+    nome: string;
+    data_nascimento: string;
+    email: string;
+    senha: string;
+  }) {
     const validData = criarUsuarioSchema.parse(data);
 
     const nascimento = new Date(validData.data_nascimento);
@@ -41,15 +45,23 @@ export class UsuarioService {
   static async buscarPorId(id: number) {
     if (isNaN(id)) throw new Error("ID deve ser um número válido");
 
-    return prisma.usuario.findUnique({
+    const usuario = await prisma.usuario.findUnique({
       where: { id },
       include: { retiradas: true },
     });
+
+    if (!usuario) throw new Error("Usuário não encontrado");
+    return usuario;
   }
 
   static async atualizar(
     id: number,
-    data: { nome?: string; data_nascimento?: string; email?: string; senha?: string }
+    data: {
+      nome?: string;
+      data_nascimento?: string;
+      email?: string;
+      senha?: string;
+    }
   ) {
     const usuarioExistente = await prisma.usuario.findUnique({ where: { id } });
     if (!usuarioExistente) throw new Error("Usuário não encontrado");

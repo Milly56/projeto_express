@@ -1,6 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
-
-const prisma = new PrismaClient();
+import { prisma } from "../database/prisma/prisma";
 
 export class RetiradaService {
   static async listarTodas() {
@@ -8,27 +6,20 @@ export class RetiradaService {
       orderBy: { dataRetirada: "desc" },
       include: {
         usuario: true,
-        livro: true
-      }
+        livro: true,
+      },
     });
   }
 
   static async listarPorId(retiradaId: number) {
-    if (isNaN(retiradaId)) {
-      throw new Error("ID deve ser um número válido");
-    }
+    if (isNaN(retiradaId)) throw new Error("ID deve ser um número válido");
 
     const retirada = await prisma.retiradaLivro.findUnique({
       where: { retiradaId },
-      include: {
-        usuario: true,
-        livro: true
-      }
+      include: { usuario: true, livro: true },
     });
 
-    if (!retirada) {
-      throw new Error("Retirada não encontrada");
-    }
+    if (!retirada) throw new Error("Retirada não encontrada");
 
     return retirada;
   }
@@ -40,45 +31,40 @@ export class RetiradaService {
     motivoRetirada: string;
     contato: string;
   }) {
-    if (
-      !data.usuarioId ||
-      !data.livroId ||
-      !data.quantidadeLivro ||
-      !data.motivoRetirada ||
-      !data.contato
-    ) {
+    const { usuarioId, livroId, quantidadeLivro, motivoRetirada, contato } = data;
+
+    if (!usuarioId || !livroId || !quantidadeLivro || !motivoRetirada || !contato) {
       throw new Error(
         "Todos os campos são obrigatórios: usuarioId, livroId, quantidadeLivro, motivoRetirada, contato"
       );
     }
 
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: typeof prisma) => {
       const livro = await tx.livro.findUnique({
-        where: { livroId: data.livroId }
+        where: { livroId },
       });
 
       if (!livro) throw new Error("Livro não encontrado");
-      if (livro.quantidade < data.quantidadeLivro) {
+      if (livro.quantidade < quantidadeLivro)
         throw new Error("Quantidade de livros insuficiente");
-      }
 
       const retirada = await tx.retiradaLivro.create({
         data: {
-          usuarioId: data.usuarioId,
-          livroId: data.livroId,
-          quantidadeLivro: data.quantidadeLivro,
-          motivoRetirada: data.motivoRetirada,
-          contato: data.contato
+          usuarioId,
+          livroId,
+          quantidadeLivro,
+          motivoRetirada,
+          contato,
         },
         include: {
           usuario: true,
-          livro: true
-        }
+          livro: true,
+        },
       });
 
       await tx.livro.update({
-        where: { livroId: data.livroId },
-        data: { quantidade: livro.quantidade - data.quantidadeLivro }
+        where: { livroId },
+        data: { quantidade: livro.quantidade - quantidadeLivro },
       });
 
       return retirada;
@@ -86,14 +72,12 @@ export class RetiradaService {
   }
 
   static async registrarDevolucao(retiradaId: number) {
-    if (isNaN(retiradaId)) {
-      throw new Error("ID deve ser um número válido");
-    }
+    if (isNaN(retiradaId)) throw new Error("ID deve ser um número válido");
 
-    return prisma.$transaction(async (tx) => {
+    return prisma.$transaction(async (tx: typeof prisma) => {
       const retirada = await tx.retiradaLivro.findUnique({
         where: { retiradaId },
-        include: { livro: true }
+        include: { livro: true },
       });
 
       if (!retirada) throw new Error("Retirada não encontrada");
@@ -102,14 +86,14 @@ export class RetiradaService {
       const retiradaAtualizada = await tx.retiradaLivro.update({
         where: { retiradaId },
         data: { dataRetorno: new Date() },
-        include: { usuario: true, livro: true }
+        include: { usuario: true, livro: true },
       });
 
       await tx.livro.update({
         where: { livroId: retirada.livroId },
         data: {
-          quantidade: retirada.livro.quantidade + retirada.quantidadeLivro
-        }
+          quantidade: retirada.livro.quantidade + retirada.quantidadeLivro,
+        },
       });
 
       return retiradaAtualizada;
@@ -117,13 +101,11 @@ export class RetiradaService {
   }
 
   static async deletarPorId(retiradaId: number) {
-    if (isNaN(retiradaId)) {
-      throw new Error("ID deve ser um número válido");
-    }
+    if (isNaN(retiradaId)) throw new Error("ID deve ser um número válido");
 
     try {
       return await prisma.retiradaLivro.delete({
-        where: { retiradaId }
+        where: { retiradaId },
       });
     } catch {
       throw new Error("Retirada não encontrada ou já foi removida");
