@@ -1,14 +1,12 @@
+import express, { Application } from "express";
+import cors from "cors";
+import swaggerUi from "swagger-ui-express";
+import swaggerJSDoc from "swagger-jsdoc";
 
-import express, { Application } from 'express';
-import swaggerUi from 'swagger-ui-express';
-import swaggerJSDoc from 'swagger-jsdoc';
-
-import livroRoutes from './routes/livroRoutes';       
-import retiradaRoutes from './routes/retiradaRoutes'; 
-
+import livroRoutes from "./routes/livroRoutes";
+import retiradaRoutes from "./routes/retiradaRoutes";
 import usuariosRoutes from "./routes/usuarioRoutes";
 import loginRoutes from "./routes/LoginRoutes";
-
 
 export default class App {
   private app: Application;
@@ -21,6 +19,25 @@ export default class App {
   }
 
   private middlewares() {
+    const allowedOrigins = [
+      "http://localhost:5173",
+      process.env.RENDER_EXTERNAL_URL,
+    ].filter(Boolean);
+
+    this.app.use(
+      cors({
+        origin: (origin, callback) => {
+          if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error("CORS bloqueado para esta origem"));
+          }
+        },
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+      })
+    );
+
     this.app.use(express.json());
   }
 
@@ -35,7 +52,9 @@ export default class App {
         },
         servers: [
           {
-            url: "http://localhost:3000",
+            url:
+              process.env.RENDER_EXTERNAL_URL ||
+              `http://localhost:${process.env.PORT || 3000}`,
           },
         ],
         components: {
@@ -48,10 +67,10 @@ export default class App {
           },
         },
       },
-      apis: ["./src/routes/*.ts"], 
+      apis: ["./src/routes/*.ts"],
     });
 
-    this.app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+    this.app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
   }
 
   private routes() {
@@ -59,12 +78,6 @@ export default class App {
     this.app.use("/api/retiradas", retiradaRoutes);
     this.app.use("/api/usuarios", usuariosRoutes);
     this.app.use("/api/login", loginRoutes);
-
-
-    this.app.get("/", (req, res) => {
-      res.send("API funcionando! 🚀");
-
-    });
   }
 
   public getApp(): Application {
