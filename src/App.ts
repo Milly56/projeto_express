@@ -14,27 +14,36 @@ export default class App {
   constructor() {
     this.app = express();
     this.middlewares();
-    this.swagger();
-    this.routes();
+    this.routes();  
+    this.swagger();  
   }
 
-  /** Middlewares globais */
   private middlewares() {
     const allowedOrigins = [
-      "http://localhost:5173",
-      process.env.RENDER_EXTERNAL_URL,
+      "http://localhost:5173", 
+      "http://localhost:3000", 
+      process.env.RENDER_EXTERNAL_URL, 
     ].filter(Boolean);
 
     this.app.use(
       cors({
         origin: (origin, callback) => {
-          // Permite chamadas sem "origin" (como do Swagger ou curl)
-          if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-          } else {
-            console.warn(`🚫 CORS bloqueado para origem: ${origin}`);
-            callback(new Error("CORS bloqueado para esta origem"));
+          console.log("🌍 Origin recebido:", origin);
+
+          if (!origin) {
+            return callback(null, true);
           }
+
+          if (origin.includes("localhost:3000")) {
+            return callback(null, true);
+          }
+
+          if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+          }
+
+          console.warn(`🚫 CORS bloqueado para origem: ${origin}`);
+          callback(new Error("CORS bloqueado para esta origem"));
         },
         credentials: true,
         methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -45,7 +54,6 @@ export default class App {
     this.app.use(express.json());
   }
 
-  /** Configuração do Swagger UI */
   private swagger() {
     const swaggerSpec = swaggerJSDoc({
       definition: {
@@ -61,12 +69,12 @@ export default class App {
             url:
               process.env.RENDER_EXTERNAL_URL?.startsWith("http")
                 ? process.env.RENDER_EXTERNAL_URL
-                : `https://${process.env.RENDER_EXTERNAL_URL}`,
-            description: "Servidor de produção (Render)",
-          },
-          {
-            url: `http://localhost:${process.env.PORT || 3000}`,
-            description: "Servidor local (desenvolvimento)",
+                : process.env.RENDER_EXTERNAL_URL
+                ? `https://${process.env.RENDER_EXTERNAL_URL}`
+                : `http://localhost:${process.env.PORT || 3000}`,
+            description: process.env.RENDER_EXTERNAL_URL
+              ? "Servidor de produção (Render)"
+              : "Servidor local (desenvolvimento)",
           },
         ],
         components: {
@@ -79,20 +87,16 @@ export default class App {
           },
         },
       },
-      apis: ["./src/routes/*.ts"], // caminhos dos endpoints
+      apis: ["./src/routes/*.ts"],
     });
 
-    // 🚀 Swagger será a página principal
-    this.app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-    // Rota para exportar o JSON do Swagger (útil para Postman e integrações)
+    this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     this.app.get("/swagger.json", (req, res) => {
       res.setHeader("Content-Type", "application/json");
       res.send(swaggerSpec);
     });
   }
 
-  /** Rotas da API */
   private routes() {
     this.app.use("/api/livros", livroRoutes);
     this.app.use("/api/retiradas", retiradaRoutes);
