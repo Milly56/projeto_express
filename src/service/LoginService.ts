@@ -32,7 +32,7 @@ export class LoginService {
     const token = jwt.sign(
       { id: user.id, email: user.email },
       process.env.JWT_SECRET || "secret",
-      { expiresIn: "1h" }
+      { expiresIn: "7d" }
     );
 
     return token;
