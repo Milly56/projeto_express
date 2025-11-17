@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { LivroController } from "../controller/LivroController";
-import { autenticarJWT} from "../middleware/authMiddleware";
+import { autenticarJWT } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -70,41 +70,41 @@ router.post("/", autenticarJWT, LivroController.criar);
 
 /**
  * @openapi
- * /api/livros/{id}:
+ * /api/livros/titulo/{titulo}:
  *   get:
- *     summary: Busca um livro pelo ID
+ *     summary: Busca um livro pelo título
  *     tags: [Livros]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: titulo
+ *         in: path
  *         required: true
  *         schema:
- *           type: integer
- *         description: ID do livro
+ *           type: string
+ *         description: Título do livro
  *     responses:
  *       200:
  *         description: Livro encontrado
  *       404:
  *         description: Livro não encontrado
  */
-router.get("/:id", autenticarJWT, LivroController.buscarPorId);
+router.get("/titulo/:titulo", autenticarJWT, LivroController.buscarPorTitulo);
 
 /**
  * @openapi
- * /api/livros/{id}:
+ * /api/livros/titulo/{titulo}:
  *   put:
- *     summary: Atualiza um livro existente
+ *     summary: Atualiza um livro com base no título
  *     tags: [Livros]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: titulo
+ *         in: path
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -124,28 +124,38 @@ router.get("/:id", autenticarJWT, LivroController.buscarPorId);
  *       404:
  *         description: Livro não encontrado
  */
-router.put("/:id", autenticarJWT, LivroController.atualizar);
+router.put("/titulo/:titulo", autenticarJWT, LivroController.atualizar);
 
 /**
  * @openapi
- * /api/livros/{id}:
+ * /api/livros:
  *   delete:
- *     summary: Remove um livro
+ *     summary: Remove um livro com base no título e quantidade
  *     tags: [Livros]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - titulo
+ *               - quantidade
+ *             properties:
+ *               titulo:
+ *                 type: string
+ *                 example: "O Senhor dos Anéis"
+ *               quantidade:
+ *                 type: integer
+ *                 example: 5
  *     responses:
- *       204:
+ *       200:
  *         description: Livro removido com sucesso
  *       404:
  *         description: Livro não encontrado
  */
-router.delete("/:id", autenticarJWT, LivroController.deletar);
+router.delete("/", autenticarJWT, LivroController.deletar);
 
 export default router;

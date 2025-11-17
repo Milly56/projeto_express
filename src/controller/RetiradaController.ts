@@ -19,15 +19,19 @@ export class RetiradaController {
     } catch (error) {
       res.status(500).json({
         success: false,
-        message: getErrorMessage(error)
+        message: getErrorMessage(error),
       });
     }
   }
 
-  static async listarPorId(req: Request, res: Response) {
+  static async listarPorNomeETitulo(req: Request, res: Response) {
     try {
-      const retiradaId = parseInt(req.params.id);
-      const retirada = await RetiradaService.listarPorId(retiradaId);
+      const { nomeUsuario, tituloLivro } = req.query;
+
+      const retirada = await RetiradaService.listarPorNomeETitulo(
+        String(nomeUsuario),
+        String(tituloLivro)
+      );
 
       res.status(200).json({
         success: true,
@@ -37,19 +41,21 @@ export class RetiradaController {
     } catch (error) {
       res.status(404).json({
         success: false,
-        message: getErrorMessage(error)
+        message: getErrorMessage(error),
       });
     }
   }
 
   static async criar(req: Request, res: Response) {
     try {
-      const novaRetirada = await RetiradaService.criar({
-        usuarioId: parseInt(req.body.usuarioId),
-        livroId: parseInt(req.body.livroId),
-        quantidadeLivro: parseInt(req.body.quantidadeLivro),
-        motivoRetirada: req.body.motivoRetirada,
-        contato: req.body.contato
+      const { nomeUsuario, tituloLivro, quantidadeLivro, motivoRetirada, contato } = req.body;
+
+      const novaRetirada = await RetiradaService.criarRetiradaPorNomeETitulo({
+        nomeUsuario,
+        tituloLivro,
+        quantidadeLivro: parseInt(quantidadeLivro),
+        motivoRetirada,
+        contato
       });
 
       res.status(201).json({
@@ -60,15 +66,19 @@ export class RetiradaController {
     } catch (error) {
       res.status(400).json({
         success: false,
-        message: getErrorMessage(error)
+        message: getErrorMessage(error),
       });
     }
   }
 
   static async registrarDevolucao(req: Request, res: Response) {
     try {
-      const retiradaId = parseInt(req.params.id);
-      const retiradaAtualizada = await RetiradaService.registrarDevolucao(retiradaId);
+      const { nomeUsuario, tituloLivro } = req.body;
+
+      const retiradaAtualizada = await RetiradaService.registrarDevolucao(
+        nomeUsuario,
+        tituloLivro
+      );
 
       res.status(200).json({
         success: true,
@@ -78,15 +88,19 @@ export class RetiradaController {
     } catch (error) {
       res.status(400).json({
         success: false,
-        message: getErrorMessage(error)
+        message: getErrorMessage(error),
       });
     }
   }
 
-  static async deletarPorId(req: Request, res: Response) {
+  static async deletar(req: Request, res: Response) {
     try {
-      const retiradaId = parseInt(req.params.id);
-      const retiradaDeletada = await RetiradaService.deletarPorId(retiradaId);
+      const { nomeUsuario, tituloLivro } = req.body;
+
+      const retiradaDeletada = await RetiradaService.deletarPorNomeETitulo(
+        nomeUsuario,
+        tituloLivro
+      );
 
       res.status(200).json({
         success: true,
@@ -96,7 +110,7 @@ export class RetiradaController {
     } catch (error) {
       res.status(404).json({
         success: false,
-        message: getErrorMessage(error)
+        message: getErrorMessage(error),
       });
     }
   }

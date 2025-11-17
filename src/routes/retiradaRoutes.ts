@@ -13,47 +13,6 @@ const router = Router();
 
 /**
  * @openapi
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- *   schemas:
- *     RetiradaLivro:
- *       type: object
- *       properties:
- *         retiradaId:
- *           type: integer
- *           example: 1
- *         quantidadeLivro:
- *           type: integer
- *           example: 2
- *         motivoRetirada:
- *           type: string
- *           example: "Estudo para prova"
- *         contato:
- *           type: string
- *           example: "(81) 99999-0000"
- *         dataRetirada:
- *           type: string
- *           format: date-time
- *           example: 2025-09-26T15:00:00Z
- *         dataRetorno:
- *           type: string
- *           format: date-time
- *           nullable: true
- *           example: null
- *         usuarioId:
- *           type: integer
- *           example: 5
- *         livroId:
- *           type: integer
- *           example: 10
- */
-
-/**
- * @openapi
  * /api/retiradas:
  *   get:
  *     summary: Lista todas as retiradas de livros
@@ -63,40 +22,37 @@ const router = Router();
  *     responses:
  *       200:
  *         description: Lista de retiradas retornada com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/RetiradaLivro'
  */
 router.get("/", autenticarJWT, RetiradaController.listarTodas);
 
 /**
  * @openapi
- * /api/retiradas/{id}:
+ * /api/retiradas/buscar:
  *   get:
- *     summary: Obtém uma retirada específica por ID
+ *     summary: Obtém uma retirada específica pelo nome do usuário e o título do livro
  *     tags: [Retiradas]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: path
- *         name: id
+ *       - in: query
+ *         name: nomeUsuario
  *         required: true
  *         schema:
- *           type: integer
+ *           type: string
+ *         description: Nome do usuário
+ *       - in: query
+ *         name: tituloLivro
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Título do livro
  *     responses:
  *       200:
  *         description: Retirada encontrada
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/RetiradaLivro'
  *       404:
  *         description: Retirada não encontrada
  */
-router.get("/:id", autenticarJWT, RetiradaController.listarPorId);
+router.get("/buscar", autenticarJWT, RetiradaController.listarPorNomeETitulo);
 
 /**
  * @openapi
@@ -113,87 +69,91 @@ router.get("/:id", autenticarJWT, RetiradaController.listarPorId);
  *           schema:
  *             type: object
  *             required:
- *               - usuarioId
- *               - livroId
+ *               - nomeUsuario
+ *               - tituloLivro
  *               - quantidadeLivro
  *               - motivoRetirada
  *               - contato
  *             properties:
- *               usuarioId:
- *                 type: integer
- *                 example: 5
- *               livroId:
- *                 type: integer
- *                 example: 10
+ *               nomeUsuario:
+ *                 type: string
+ *                 example: "Maria Silva"
+ *               tituloLivro:
+ *                 type: string
+ *                 example: "JavaScript Avançado"
  *               quantidadeLivro:
  *                 type: integer
  *                 example: 1
  *               motivoRetirada:
  *                 type: string
- *                 example: "Leitura para pesquisa"
+ *                 example: "Leitura para estudo"
  *               contato:
  *                 type: string
  *                 example: "(81) 91234-5678"
  *     responses:
  *       201:
  *         description: Retirada registrada com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/RetiradaLivro'
  */
 router.post("/", autenticarJWT, RetiradaController.criar);
 
 /**
  * @openapi
- * /api/retiradas/{id}/devolver:
+ * /api/retiradas/devolver:
  *   put:
- *     summary: Registra a devolução de uma retirada
+ *     summary: Registra devolução com nome do usuário e título do livro
  *     tags: [Retiradas]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nomeUsuario
+ *               - tituloLivro
+ *             properties:
+ *               nomeUsuario:
+ *                 type: string
+ *               tituloLivro:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Devolução registrada com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/RetiradaLivro'
  *       404:
  *         description: Retirada não encontrada
  */
-router.put("/:id/devolver", autenticarJWT, RetiradaController.registrarDevolucao);
+router.put("/devolver", autenticarJWT, RetiradaController.registrarDevolucao);
 
 /**
  * @openapi
- * /api/retiradas/{id}:
+ * /api/retiradas/deletar:
  *   delete:
- *     summary: Remove uma retirada por ID
+ *     summary: Deleta uma retirada com nome do usuário e título do livro
  *     tags: [Retiradas]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nomeUsuario
+ *               - tituloLivro
+ *             properties:
+ *               nomeUsuario:
+ *                 type: string
+ *               tituloLivro:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Retirada removida com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/RetiradaLivro'
  *       404:
  *         description: Retirada não encontrada
  */
-router.delete("/:id", autenticarJWT, RetiradaController.deletarPorId);
+router.delete("/deletar", autenticarJWT, RetiradaController.deletar);
 
 export default router;

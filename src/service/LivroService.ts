@@ -21,17 +21,26 @@ export class LivroService {
     });
   }
 
-  static async buscarPorId(livroId: number) {
-    if (isNaN(livroId)) throw new Error("ID deve ser um número válido");
-    return prisma.livro.findUnique({ where: { livroId } });
+
+  static async buscarPorTitulo(titulo: string) {
+    if (!titulo) throw new Error("Você deve informar o título");
+
+    return prisma.livro.findFirst({
+      where: { titulo },
+    });
   }
 
-  static async atualizar(livroId: number, data: { titulo?: string; categoria?: string; quantidade?: number }) {
-    const livroExistente = await prisma.livro.findUnique({ where: { livroId } });
+  static async atualizarPorTitulo(
+    titulo: string,
+    data: { titulo?: string; categoria?: string; quantidade?: number }
+  ) {
+    if (!titulo) throw new Error("Título atual é obrigatório");
+
+    const livroExistente = await prisma.livro.findFirst({ where: { titulo } });
     if (!livroExistente) throw new Error("Livro não encontrado");
 
     return prisma.livro.update({
-      where: { livroId },
+      where: { livroId: livroExistente.livroId },
       data: {
         titulo: data.titulo ?? livroExistente.titulo,
         categoria: data.categoria ?? livroExistente.categoria,
@@ -40,10 +49,21 @@ export class LivroService {
     });
   }
 
-  static async deletar(livroId: number) {
-    const livroExistente = await prisma.livro.findUnique({ where: { livroId } });
-    if (!livroExistente) throw new Error("Livro não encontrado");
+  static async deletarPorTituloEQuantidade(titulo: string, quantidade: number) {
+    if (!titulo || quantidade == null) {
+      throw new Error("Título e quantidade são obrigatórios");
+    }
 
-    return prisma.livro.delete({ where: { livroId } });
+    const livroExistente = await prisma.livro.findFirst({
+      where: { titulo, quantidade },
+    });
+
+    if (!livroExistente) {
+      throw new Error("Nenhum livro encontrado com esse título e quantidade");
+    }
+
+    return prisma.livro.delete({
+      where: { livroId: livroExistente.livroId },
+    });
   }
 }

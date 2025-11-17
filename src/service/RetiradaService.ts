@@ -1,6 +1,7 @@
 import { prisma } from "../database/prisma/prisma";
 
 export class RetiradaService {
+
   static async listarTodas() {
     return prisma.retiradaLivro.findMany({
       orderBy: { dataRetirada: "desc" },
@@ -11,38 +12,40 @@ export class RetiradaService {
     });
   }
 
-  static async listarPorId(retiradaId: number) {
-    if (isNaN(retiradaId)) throw new Error("ID deve ser um número válido");
+  static async listarPorNomeETitulo(nomeUsuario: string, tituloLivro: string) {
+    if (!nomeUsuario || !tituloLivro)
+      throw new Error("Nome do usuário e título do livro são obrigatórios");
 
-    const retirada = await prisma.retiradaLivro.findUnique({
-      where: { retiradaId },
+    const retirada = await prisma.retiradaLivro.findFirst({
+      where: {
+        usuario: { nome: nomeUsuario },
+        livro: { titulo: tituloLivro },
+      },
       include: { usuario: true, livro: true },
     });
 
-    if (!retirada) throw new Error("Retirada não encontrada");
+    if (!retirada) throw new Error("Retirada não encontrada para esse usuário e livro");
 
     return retirada;
   }
 
-  static async criar(data: {
-    usuarioId: number;
-    livroId: number;
+  static async criarRetiradaPorNomeETitulo(data: {
+    nomeUsuario: string;
+    tituloLivro: string;
     quantidadeLivro: number;
     motivoRetirada: string;
     contato: string;
   }) {
-    const { usuarioId, livroId, quantidadeLivro, motivoRetirada, contato } = data;
+    const { nomeUsuario, tituloLivro, quantidadeLivro, motivoRetirada, contato } = data;
 
-    if (!usuarioId || !livroId || !quantidadeLivro || !motivoRetirada || !contato) {
+    if (!nomeUsuario || !tituloLivro || !quantidadeLivro || !motivoRetirada || !contato) {
       throw new Error(
-        "Todos os campos são obrigatórios: usuarioId, livroId, quantidadeLivro, motivoRetirada, contato"
+        "Todos os campos são obrigatórios: nomeUsuario, tituloLivro, quantidadeLivro, motivoRetirada, contato"
       );
     }
 
-    return prisma.$transaction(async (tx: typeof prisma) => {
-      const livro = await tx.livro.findUnique({
-        where: { livroId },
-      });
+    return prisma.$transaction(async (tx) => {
+      const livro = await tx.livro.findUnique({ where: { titulo: tituloLivro } });
 
       if (!livro) throw new Error("Livro não encontrado");
       if (livro.quantidade < quantidadeLivro)
@@ -50,20 +53,21 @@ export class RetiradaService {
 
       const retirada = await tx.retiradaLivro.create({
         data: {
-          usuarioId,
-          livroId,
           quantidadeLivro,
           motivoRetirada,
           contato,
+          usuario: {
+            connect: { nome: nomeUsuario },
+          },
+          livro: {
+            connect: { titulo: tituloLivro },
+          },
         },
-        include: {
-          usuario: true,
-          livro: true,
-        },
+        include: { usuario: true, livro: true },
       });
 
       await tx.livro.update({
-        where: { livroId },
+        where: { livroId: livro.livroId },
         data: { quantidade: livro.quantidade - quantidadeLivro },
       });
 
@@ -71,22 +75,49 @@ export class RetiradaService {
     });
   }
 
-  static async registrarDevolucao(retiradaId: number) {
-    if (isNaN(retiradaId)) throw new Error("ID deve ser um número válido");
 
-    return prisma.$transaction(async (tx: typeof prisma) => {
-      const retirada = await tx.retiradaLivro.findUnique({
-        where: { retiradaId },
-        include: { livro: true },
-      });
+  static async atualizar(
+    retiradaId: number,
+    data: {
+      quantidadeLivro?: number;
+      motivoRetirada?: string;
+      contato?: string;
+    }
+  ) {
+    const retiradaExistente = await prisma.retiradaLivro.findUnique({
+      where: { retiradaId },
+    });
 
-      if (!retirada) throw new Error("Retirada não encontrada");
-      if (retirada.dataRetorno) throw new Error("Devolução já registrada");
+    if (!retiradaExistente) throw new Error("Retirada não encontrada");
 
+    return prisma.retiradaLivro.update({
+      where: { retiradaId },
+      data: {
+        quantidadeLivro: data.quantidadeLivro ?? retiradaExistente.quantidadeLivro,
+        motivoRetirada: data.motivoRetirada ?? retiradaExistente.motivoRetirada,
+        contato: data.contato ?? retiradaExistente.contato,
+      },
+      include: { usuario: true, livro: true },
+    });
+  }
+
+
+  static async registrarDevolucao(nomeUsuario: string, tituloLivro: string) {
+    const retirada = await prisma.retiradaLivro.findFirst({
+      where: {
+        usuario: { nome: nomeUsuario },
+        livro: { titulo: tituloLivro },
+        dataRetorno: null,
+      },
+      include: { livro: true },
+    });
+
+    if (!retirada) throw new Error("Nenhuma retirada pendente encontrada");
+
+    return prisma.$transaction(async (tx) => {
       const retiradaAtualizada = await tx.retiradaLivro.update({
-        where: { retiradaId },
+        where: { retiradaId: retirada.retiradaId },
         data: { dataRetorno: new Date() },
-        include: { usuario: true, livro: true },
       });
 
       await tx.livro.update({
@@ -100,15 +131,18 @@ export class RetiradaService {
     });
   }
 
-  static async deletarPorId(retiradaId: number) {
-    if (isNaN(retiradaId)) throw new Error("ID deve ser um número válido");
+  static async deletarPorNomeETitulo(nomeUsuario: string, tituloLivro: string) {
+    const retirada = await prisma.retiradaLivro.findFirst({
+      where: {
+        usuario: { nome: nomeUsuario },
+        livro: { titulo: tituloLivro },
+      },
+    });
 
-    try {
-      return await prisma.retiradaLivro.delete({
-        where: { retiradaId },
-      });
-    } catch {
-      throw new Error("Retirada não encontrada ou já foi removida");
-    }
+    if (!retirada) throw new Error("Retirada não encontrada");
+
+    return prisma.retiradaLivro.delete({
+      where: { retiradaId: retirada.retiradaId },
+    });
   }
 }
