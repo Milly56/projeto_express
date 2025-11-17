@@ -48,13 +48,13 @@ export class RetiradaController {
 
   static async criar(req: Request, res: Response) {
     try {
-      const { nomeUsuario, tituloLivro, quantidadeLivro, motivoRetirada, contato } = req.body;
+      const { nomeUsuario, tituloLivro, quantidade_livro, motivo_retirada, contato } = req.body;
 
       const novaRetirada = await RetiradaService.criarRetiradaPorNomeETitulo({
         nomeUsuario,
         tituloLivro,
-        quantidadeLivro: parseInt(quantidadeLivro),
-        motivoRetirada,
+        quantidade_livro: parseInt(quantidade_livro),
+        motivo_retirada,
         contato
       });
 
