@@ -23,20 +23,19 @@ model Livro {
 }
 
 model RetiradaLivro {
-  retiradaId         Int      @id @default(autoincrement()) @map("retirada_id")
-  quantidadeLivro    Int
-  motivoRetirada     String
-  contato            String
-  dataRetirada       DateTime @default(now())
-  dataRetorno        DateTime?
+  retirada_id    Int      @id @default(autoincrement())
+  quantidade_livro Int
+  motivo_retirada String
+  contato         String
+  data_retirada   DateTime @default(now())
+  data_retorno    DateTime?
+  usuario_id      Int
+  livro_id        Int
 
-  usuarioId Int
-  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuario         Usuario @relation(fields: [usuario_id], references: [id])
+  livro           Livro   @relation(fields: [livro_id], references: [livroId])  // Corrigir de livro_id para livroId
 
-  livroId Int
-  livro   Livro @relation(fields: [livroId], references: [livroId])
-
-  @@map("retirada_livro")
+  @@map("retirada_livro")  // Nome da tabela no banco de dados
 }
 
 model Usuario {
