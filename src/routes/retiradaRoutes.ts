@@ -13,15 +13,70 @@ const router = Router();
 
 /**
  * @openapi
+ * components:
+ *   schemas:
+ *     RetiradaLivro:
+ *       type: object
+ *       properties:
+ *         nomeUsuario:
+ *           type: string
+ *         tituloLivro:
+ *           type: string
+ *         quantidade:
+ *           type: integer
+ *         motivo:
+ *           type: string
+ *         contato:
+ *           type: string
+ *         dataRetirada:
+ *           type: string
+ *           format: date-time
+ *         dataDevolucao:
+ *           type: string
+ *           nullable: true
+ *           format: date-time
+ *       example:
+ *         nomeUsuario: "Maria da Silva"
+ *         tituloLivro: "O Senhor dos Anéis"
+ *         quantidade: 5
+ *         motivo: "Leitura para estudo"
+ *         contato: "(81) 91234-5678"
+ *         dataRetirada: "2025-01-01T12:00:00.000Z"
+ *         dataDevolucao: null
+ */
+
+/**
+ * @openapi
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
+/**
+ * @openapi
  * /api/retiradas:
  *   get:
- *     summary: Lista todas as retiradas de livros
+ *     summary: Lista todas as retiradas registradas
  *     tags: [Retiradas]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de retiradas retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 retiradas:
+ *                   type: array
+ *                   items:
+ *                     $ref: "#/components/schemas/RetiradaLivro"
  */
 router.get("/", autenticarJWT, RetiradaController.listarTodas);
 
@@ -29,7 +84,7 @@ router.get("/", autenticarJWT, RetiradaController.listarTodas);
  * @openapi
  * /api/retiradas/buscar:
  *   get:
- *     summary: Obtém uma retirada específica pelo nome do usuário e o título do livro
+ *     summary: Busca uma retirada pelo nome do usuário e título do livro
  *     tags: [Retiradas]
  *     security:
  *       - bearerAuth: []
@@ -39,18 +94,25 @@ router.get("/", autenticarJWT, RetiradaController.listarTodas);
  *         required: true
  *         schema:
  *           type: string
- *         description: Nome do usuário
  *       - in: query
  *         name: tituloLivro
  *         required: true
  *         schema:
  *           type: string
- *         description: Título do livro
  *     responses:
  *       200:
  *         description: Retirada encontrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 retirada:
+ *                   $ref: "#/components/schemas/RetiradaLivro"
  *       404:
- *         description: Retirada não encontrada
+ *         description: Nenhuma retirada encontrada
  */
 router.get("/buscar", autenticarJWT, RetiradaController.listarPorNomeETitulo);
 
@@ -77,22 +139,19 @@ router.get("/buscar", autenticarJWT, RetiradaController.listarPorNomeETitulo);
  *             properties:
  *               nomeUsuario:
  *                 type: string
- *                 example: "Maria Silva"
  *               tituloLivro:
  *                 type: string
- *                 example: "JavaScript Avançado"
  *               quantidadeLivro:
  *                 type: integer
- *                 example: 1
  *               motivoRetirada:
  *                 type: string
- *                 example: "Leitura para estudo"
  *               contato:
  *                 type: string
- *                 example: "(81) 91234-5678"
  *     responses:
  *       201:
  *         description: Retirada registrada com sucesso
+ *       400:
+ *         description: Erro de validação
  */
 router.post("/", autenticarJWT, RetiradaController.criar);
 
@@ -100,7 +159,7 @@ router.post("/", autenticarJWT, RetiradaController.criar);
  * @openapi
  * /api/retiradas/devolver:
  *   put:
- *     summary: Registra devolução com nome do usuário e título do livro
+ *     summary: Registra devolução de um livro
  *     tags: [Retiradas]
  *     security:
  *       - bearerAuth: []
@@ -130,7 +189,7 @@ router.put("/devolver", autenticarJWT, RetiradaController.registrarDevolucao);
  * @openapi
  * /api/retiradas/deletar:
  *   delete:
- *     summary: Deleta uma retirada com nome do usuário e título do livro
+ *     summary: Remove uma retirada pelo nome do usuário e título do livro
  *     tags: [Retiradas]
  *     security:
  *       - bearerAuth: []

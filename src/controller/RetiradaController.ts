@@ -1,25 +1,17 @@
 import { Request, Response } from "express";
 import { RetiradaService } from "../service/RetiradaService";
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return String(error);
-}
-
 export class RetiradaController {
+
   static async listarTodas(req: Request, res: Response) {
     try {
-      const retiradas = await RetiradaService.listarTodas();
-      res.status(200).json({
-        success: true,
-        message: "Retiradas listadas com sucesso",
-        data: retiradas,
-        total: retiradas.length
-      });
+      const dados = await RetiradaService.listarTodas();
+      return res.json({ success: true, retiradas: dados });
     } catch (error) {
-      res.status(500).json({
+      console.error("Erro ao listar todas as retiradas:", error);
+      return res.status(500).json({
         success: false,
-        message: getErrorMessage(error),
+        message: "Erro interno ao listar retiradas"
       });
     }
   }
@@ -28,45 +20,60 @@ export class RetiradaController {
     try {
       const { nomeUsuario, tituloLivro } = req.query;
 
+      if (!nomeUsuario || !tituloLivro) {
+        return res.status(400).json({
+          success: false,
+          message: "Informe nomeUsuario e tituloLivro pelos query params"
+        });
+      }
+
       const retirada = await RetiradaService.listarPorNomeETitulo(
         String(nomeUsuario),
         String(tituloLivro)
       );
 
-      res.status(200).json({
-        success: true,
-        message: "Retirada encontrada com sucesso",
-        data: retirada
-      });
+      if (!retirada.success) {
+        return res.status(404).json(retirada);
+      }
+
+      return res.json(retirada);
+
     } catch (error) {
-      res.status(404).json({
+      console.error("Erro ao listar por nome e título:", error);
+      return res.status(500).json({
         success: false,
-        message: getErrorMessage(error),
+        message: "Erro interno ao buscar retirada"
       });
     }
   }
 
   static async criar(req: Request, res: Response) {
     try {
-      const { nomeUsuario, tituloLivro, quantidade_livro, motivo_retirada, contato } = req.body;
+      const { nomeUsuario, tituloLivro, quantidadeLivro, motivoRetirada, contato } = req.body;
 
-      const novaRetirada = await RetiradaService.criarRetiradaPorNomeETitulo({
+      if (!nomeUsuario || !tituloLivro || !quantidadeLivro || !motivoRetirada || !contato) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Todos os campos são obrigatórios: nomeUsuario, tituloLivro, quantidadeLivro, motivoRetirada, contato"
+        });
+      }
+
+      const retirada = await RetiradaService.criar({
         nomeUsuario,
         tituloLivro,
-        quantidade_livro: parseInt(quantidade_livro),
-        motivo_retirada,
+        quantidadeLivro,
+        motivoRetirada,
         contato
       });
 
-      res.status(201).json({
-        success: true,
-        message: "Retirada registrada com sucesso",
-        data: novaRetirada
-      });
+      return res.status(201).json(retirada);
+
     } catch (error) {
-      res.status(400).json({
+      console.error("Erro ao criar retirada:", error);
+      return res.status(500).json({
         success: false,
-        message: getErrorMessage(error),
+        message: "Erro interno ao criar retirada"
       });
     }
   }
@@ -75,20 +82,29 @@ export class RetiradaController {
     try {
       const { nomeUsuario, tituloLivro } = req.body;
 
-      const retiradaAtualizada = await RetiradaService.registrarDevolucao(
+      if (!nomeUsuario || !tituloLivro) {
+        return res.status(400).json({
+          success: false,
+          message: "Informe nomeUsuario e tituloLivro"
+        });
+      }
+
+      const resultado = await RetiradaService.registrarDevolucao(
         nomeUsuario,
         tituloLivro
       );
 
-      res.status(200).json({
-        success: true,
-        message: "Devolução registrada com sucesso",
-        data: retiradaAtualizada
-      });
+      if (!resultado.success) {
+        return res.status(404).json(resultado);
+      }
+
+      return res.json(resultado);
+
     } catch (error) {
-      res.status(400).json({
+      console.error("Erro ao registrar devolução:", error);
+      return res.status(500).json({
         success: false,
-        message: getErrorMessage(error),
+        message: "Erro interno ao registrar devolução"
       });
     }
   }
@@ -97,20 +113,26 @@ export class RetiradaController {
     try {
       const { nomeUsuario, tituloLivro } = req.body;
 
-      const retiradaDeletada = await RetiradaService.deletarPorNomeETitulo(
-        nomeUsuario,
-        tituloLivro
-      );
+      if (!nomeUsuario || !tituloLivro) {
+        return res.status(400).json({
+          success: false,
+          message: "Informe nomeUsuario e tituloLivro"
+        });
+      }
 
-      res.status(200).json({
-        success: true,
-        message: "Retirada removida com sucesso",
-        data: retiradaDeletada
-      });
+      const resultado = await RetiradaService.deletar(nomeUsuario, tituloLivro);
+
+      if (!resultado.success) {
+        return res.status(404).json(resultado);
+      }
+
+      return res.json(resultado);
+
     } catch (error) {
-      res.status(404).json({
+      console.error("Erro ao deletar retirada:", error);
+      return res.status(500).json({
         success: false,
-        message: getErrorMessage(error),
+        message: "Erro interno ao deletar retirada"
       });
     }
   }
