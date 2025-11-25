@@ -22,7 +22,7 @@ export default class App {
     const allowedOrigins = [
       "http://localhost:5173",
       "http://localhost:3000",
-      "https://project-react-six-zeta.vercel.app",
+      "https://project-react-tqhm.vercel.app",
       process.env.RENDER_EXTERNAL_URL,
       process.env.VERCEL_EXTERNAL_URL
     ].filter(Boolean);
