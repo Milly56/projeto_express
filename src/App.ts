@@ -14,15 +14,17 @@ export default class App {
   constructor() {
     this.app = express();
     this.middlewares();
-    this.routes();  
-    this.swagger();  
+    this.routes();
+    this.swagger();
   }
 
   private middlewares() {
     const allowedOrigins = [
-      "http://localhost:5173", 
-      "http://localhost:3000", 
-      process.env.RENDER_EXTERNAL_URL, 
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://project-react-six-zeta.vercel.app",
+      process.env.RENDER_EXTERNAL_URL,
+      process.env.VERCEL_EXTERNAL_URL
     ].filter(Boolean);
 
     this.app.use(
@@ -37,7 +39,6 @@ export default class App {
           if (origin.includes("localhost:3000")) {
             return callback(null, true);
           }
-
           if (allowedOrigins.includes(origin)) {
             return callback(null, true);
           }
